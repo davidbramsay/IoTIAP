@@ -1,0 +1,5 @@
+name: pinserver
+description: A sample command-line application
+dependencies:
+  http_server: any
+  mailer: any
