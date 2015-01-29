@@ -9,9 +9,11 @@ class pinInterface{
 
 
 	var interfaceIntrospected;
-	
+    var analogPinAddress;
+
 	pinInterface(){
 		this.interfaceIntrospected = reflect(this);
+		this.analogPinAddress = gpioAnalogEnable();
 	}
 
 	ExecuteExternalCommand(funcName, funcParams){
@@ -34,6 +36,13 @@ class pinInterface{
 
 	}
 
+	String gpioAnalogEnable() {
+
+		Process.runSync('bash', ['-c', 'echo cape-bone-iio > /sys/devices/bone_capemgr.*/slots']);
+	    var temp =	Process.runSync('bash', ['-c', 'find /sys -name *AIN0']);
+		return temp.stdout.substring(0,temp.stdout.length-2);
+	}
+
 	void gpioSetPinDirection(pinNumber, pinDirection) {
         
         gpioUnexport(pinNumber);
@@ -49,6 +58,18 @@ class pinInterface{
 
 	}
 
+	Future<String> gpioGetAnalogPinValue(pinNumber) {
+
+		Process.runSync('bash', ['-c', '"echo ${this.analogPinAddress}$pinNumber"']);
+
+		var file = new File("${this.analogPinAddress}$pinNumber");
+
+		Future<String> finishedReading = file.readAsString(encoding: ASCII); 
+
+		return finishedReading; 
+
+	}
+	
 	void gpioSetPinValue(pinNumber, pinValue) {
 
 		String commandString = "echo " + pinValue.toString() + " > /sys/class/gpio/gpio" + pinNumber.toString() + "/value";
